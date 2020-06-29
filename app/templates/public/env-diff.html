@@ -1,0 +1,85 @@
+{% extends "public/templates/public_template.html" %}
+ 
+{% block title %}Systems{% endblock %}
+ 
+
+
+{% block main %}
+<div class="container">
+
+ 
+  <div class="row">
+    <div class="col">
+        <h1>Diff changes for system: {{  system|upper  }}</h1>
+        <form action="#" method="POST">
+          <div class="bs-diff">
+                    <div class="accordion" id="accordionDiff">
+                        <div class="card">
+                            <div class="card-header" id="headingOne">
+                                <h2 class="mb-0">
+                                    <button type="button" class="btn btn-link" data-toggle="collapse" data-target="#collapseOne">Show diff</button>									
+                                </h2>
+                            </div>
+                            <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordionDiff">
+                                <div class="card-body">
+                                    {% set list1 = diff['diff'].split('\n') %}
+                                        {% for item in list1 %}
+                                          <p>{{ item }}<p/>
+                                        {% endfor %} 
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="headingTwo">
+                                <h2 class="mb-0">
+                                    <button type="button" class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo">Changed files</button>
+                                </h2>
+                            </div>
+                            <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionDiff">
+                                <div class="card-body">
+                                    <select  multiple class="form-control" name="changed_files" id="changed_files">
+                                          {% for item in diff['changed_files'] %}
+                                            <option>{{ item }}</option>
+                                          {% endfor %}
+                                          </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="card-header" id="headingThree">
+                                <h2 class="mb-0">
+                                    <button type="button" class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseThree">Untracked files</button>                     
+                                </h2>
+                            </div>
+                            <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionDiff">
+                                <div class="card-body">
+                                    <select  multiple class="form-control" name="untracked_files" id="untracked_files">
+                                          {% for item in diff['untracked_files'] %}
+                                            <option>{{ item }}</option>
+                                          {% endfor %}
+                                          </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Message</legend>
+                  <div class="col-sm-10">
+                    <input type="work_branch_pref" class="form-control" id="commit_message" name="commit_message" placeholder="Сommit message" value="CCS {{ system }} - auto commit">
+                  </div>
+                </div>
+              <button type="submit" class="btn btn-outline-info" name="back">Back</button>
+              <button type="submit" class="btn btn-primary" name="commit_selected">Commit selected files</button>
+              <button type="submit" class="btn btn-primary" name="commit_all">Commit all files</button>
+              <button type="submit" class="btn btn-primary" name="commit_all_untracked">Commit all untracked files</button>
+              <button type="submit" class="btn btn-primary" name="commit_all_changed">Commit all changed files</button>
+            </form>
+    </div>
+  </div>
+  
+
+</div>
+
+  
+{% endblock %}
