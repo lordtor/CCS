@@ -69,6 +69,13 @@ def list_systems_dirs(system):
             dirs.append(r)
     return dirs
 
+def read_file(file_path):
+    with open(file_path, 'r') as file:
+        data = file.read()
+        file.close()
+    return data
+
+
 @app.before_request
 def start_timer():
     g.start = time.time()
@@ -108,18 +115,21 @@ def log_request(response):
 
     return response
 
-
 @app.route("/")
 def index():
     return render_template("public/index.html", envs=get_systems())
 
+
 @app.route("/about")
 def about():
-    return "All about config control"
+    from markdown2 import markdown
+    readme = read_file(path.join(app.config['ROOT_DIR'], "README.md"))
+    content = markdown(readme, extras=["tables","fenced-code-blocks",'attr_list', 'footnotes']).replace('<table>', '<table class="table">')
+    return render_template("public/about.html", envs=get_systems(), content=content)
 
 @app.route("/show-config")
 def config():
-    return jsonify(app.config["APP_CONFIG"])
+    return render_template("public/show-config.html", envs=get_systems(), val=app.config)
 
 @app.route("/json", methods=["POST"])
 def json_example():
@@ -319,3 +329,29 @@ def env_settings_diff(system):
 @app.route("/app-settings", methods=["GET", "POST"])
 def app_settings():
     return render_template("public/app-settings.html", system=app.config['APP_CONFIG']['app'])
+
+
+@app.route("/cred-settings", methods=["GET", "POST"])
+def cred_settings():
+    creds = app.config['APP_CONFIG']['app']['creds']
+    print(creds)
+    return render_template("public/cred-settings.html", creds=creds)
+
+@app.route("/cred-settings-add", methods=["GET", "POST"])
+def cred_settings_add():
+    files = [f for f in listdir(app.config['APP_CONFIG']['app']["cred_file_dir"]) if path.isfile(path.join(app.config['APP_CONFIG']['app']["cred_file_dir"], f))]
+    if request.method == "POST":
+        req = request.form
+        cred = {
+            "name": req.get("name"),
+            "login": req.get("login"),
+            "cred_file": path.join(app.config['APP_CONFIG']['app']["cred_file_dir"], req.get("file"))
+            }
+        if not req.get("name") in app.config['APP_CONFIG']['app']['creds']:
+            app.config['APP_CONFIG']['app']['creds'].update({"{}".format(req.get("name")): cred})
+            flash('CCS {} add to memory configuration success'.format(req.get("name")), "success")
+            with open(app.config['APP_CONFIG_FILE'], 'w') as f:
+                dump(app.config['APP_CONFIG'], f)
+                flash('CCS {} succesed saved on disk'.format(req.get("name")), "success")
+        return render_template("public/cred-settings-add.html", system=app.config['APP_CONFIG']['app'], files=files)
+    return render_template("public/cred-settings-add.html", system=app.config['APP_CONFIG']['app'], files=files)

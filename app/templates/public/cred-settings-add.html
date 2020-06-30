@@ -1,0 +1,39 @@
+{% extends "public/templates/public_template.html" %}
+
+{% block title %}Add credentials{% endblock %}
+
+{% block main %}
+
+<div class="container">
+  <div class="row">
+    <div class="col">
+    <h1>Add credentials</h1>
+      <hr>
+      <div class="card">
+        <div class="card-body">
+            <form action="#" method="POST">
+                <div class="form-group">
+                  <label>Name</label>
+                  <input type="text" class="form-control" id="name" name="name" placeholder="System name">
+                </div>
+                <div class="form-group">
+                  <label>Login</label>
+                  <input type="text" class="form-control" id="login" name="login" placeholder="User login">
+                </div>
+                <div class="form-group">
+                  <label for="inputState">Cred file</label>
+                  <select  id="file" name="file" class="form-control">
+                  {% for file in files %}
+                      <option>{{ file }}</option>
+                  {% endfor %}
+                  </select>
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

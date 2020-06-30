@@ -11,35 +11,42 @@ def check_path(path_dir):
     if not path.exists(path_dir):
         makedirs(path_dir)
 
+def read_file(file_path):
+    with open(file_path, 'r') as file:
+        data = file.read().replace('\n', '')
+        file.close()
+    return data
+
 def load_conf(file_name):
     if not path.isfile(file_name):
         print('Config not found! Create new.')
         data = {
             "systems": {},
-                "app":{
-                    "SECRET_KEY": 'OCML3BRawWEUeaxcuKHLpw',
-                    "CSRF": True,
-                    "DEBUG": False,
-                    "SESSION_COOKIE_SECURE": False,
-                    "ENV": "production",
-                    "MAX_CONTENT_LENGTH": 50 * 1024 * 1024,
-                    "ALLOWED_FILE_EXTENSIONS": ["json", "txt", "html", "conf", "sub"],
-                    "repository_dir": "repository",
-                    "uploads_dir": "uploads",
-                    "loginig": {
-                        "log_dir": "logs",
-                        "log_file_name": "CCS.log",
-                        "log_level": "INFO",
-                        "log_max_size": 1024,
-                        "log_backup_count": 3
-                    },
-                    "git_settings": {
-                        "git_log_level": "INFO",
-                        "git_user": "Yuriy Rumyantsev",
-                        "git_mail": "rumyantsevyn@yandex.ru",
-                    },
-                }
+            "app":{
+                "SECRET_KEY": 'OCML3BRawWEUeaxcuKHLpw',
+                "CSRF": True,
+                "DEBUG": False,
+                "SESSION_COOKIE_SECURE": False,
+                "ENV": "production",
+                "MAX_CONTENT_LENGTH": 50 * 1024 * 1024,
+                "ALLOWED_FILE_EXTENSIONS": ["json", "txt", "html", "conf", "sub"],
+                "repository_dir": "repository",
+                "cred_file_dir": "/run/secrets",
+                "loginig": {
+                    "log_dir": "logs",
+                    "log_file_name": "CCS.log",
+                    "log_level": "INFO",
+                    "log_max_size": 1024,
+                    "log_backup_count": 3
+                },
+                "git_settings": {
+                    "git_log_level": "INFO",
+                    "git_user": "Yuriy Rumyantsev",
+                    "git_mail": "rumyantsevyn@yandex.ru",
+                },
+                "creds": {}
             }
+        }
         with open(file_name, 'w') as f:
             dump(data, f)
     else:
@@ -47,6 +54,7 @@ def load_conf(file_name):
     with open(file_name) as f:
         conf = load(f)
     return conf
+
 
 
 def check_repository(pathx, conf, log_conf, logger, git):
@@ -91,8 +99,20 @@ def check_repository(pathx, conf, log_conf, logger, git):
 class Config(object):
     DEBUG = False
     TESTING = False
-    APP_CONFIG_FILE = path.join(basedir, 'config.json')
+    ROOT_DIR = basedir
+    UPLOADS =  path.join(path.join(basedir, 'app/static'), "uploads")
+    check_path(UPLOADS)
+    CONFIG_PATH = path.join(UPLOADS, 'ccs')
+    check_path(CONFIG_PATH)
+    APP_CONFIG_FILE = path.join(CONFIG_PATH, 'config.json')
     APP_CONFIG = load_conf(APP_CONFIG_FILE)
+    CREDS = {}
+    for cred in APP_CONFIG["app"]["creds"]:
+        CREDS["{}".format(APP_CONFIG["app"]["creds"][cred]["name"])] = {
+            "name": APP_CONFIG["app"]["creds"][cred]["name"],
+            "login": APP_CONFIG["app"]["creds"][cred]["login"],
+            "passwd": read_file(APP_CONFIG["app"]["creds"][cred]["cred_file"])
+        }
     SESSION_TYPE = 'filesystem'
 
 class DefaultConfig(Config):
@@ -100,7 +120,6 @@ class DefaultConfig(Config):
     CSRF_ENABLED = Config.APP_CONFIG["app"]["CSRF"]
     SECRET_KEY = Config.APP_CONFIG["app"]["SECRET_KEY"]
     SESSION_COOKIE_SECURE = Config.APP_CONFIG["app"]["SESSION_COOKIE_SECURE"]
-    UPLOADS =  path.join(path.join(basedir, 'app/static'), Config.APP_CONFIG["app"]["uploads_dir"])
     ALLOWED_FILE_EXTENSIONS = Config.APP_CONFIG["app"]["ALLOWED_FILE_EXTENSIONS"]
     MAX_CONTENT_LENGTH = Config.APP_CONFIG["app"]["MAX_CONTENT_LENGTH"] * 1024 * 1024 #50MB
     GIT = { "user": Config.APP_CONFIG["app"]["git_settings"]["git_user"],
@@ -158,7 +177,7 @@ class DefaultConfig(Config):
     }
     logging.config.dictConfig(LOG_CONF)
     logger = logging.getLogger("CCS")
-    REPOSITORY = check_repository(UPLOADS, Config.APP_CONFIG, LOG_CONF, logger, GIT)
+    REPOSITORY = check_repository(Config.UPLOADS, Config.APP_CONFIG, LOG_CONF, logger, GIT)
     
 class ProductionConfig(Config):
     DEBUG = False

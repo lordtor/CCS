@@ -33,33 +33,33 @@ $ flask run
 
 ## Advanced configuration
 
-| Type | Section | Parametr | Dscription |
+| Type   | Section   | Parametr   | Dscription |
 |---|---|---|---|
-| systems | root | name |   |
-| systems | git | cred_id |   |
-| systems | git | url |   |
-| systems | git | branch |   |
-| systems | git | work_branch_pref |   |
-| systems | git | work_dir |   |
-| systems | git | auto_recreate |   |
-| systems | git | auto_pull |   |
-| app | root | SECRET_KEY |   |
-| app | root | CSRF |   |
-| app | root | DEBUG |   |
-| app | root | SESSION_COOKIE_SECURE |   |
-| app | root | ENV |   |
-| app | root | MAX_CONTENT_LENGTH |   |
-| app | root | ALLOWED_FILE_EXTENSIONS |   |
-| app | root | uploads_dir |   |
-| app | root | repository_dir |   |
-| app | loginig | log_dir |   |
-| app | loginig | log_file_name |   |
-| app | loginig | log_level |   |
-| app | loginig | log_max_size |   |
-| app | loginig | log_backup_count |   |
-| app | git_settings | git_log_level |   |
-| app | git_settings | git_user |   |
-| app | git_settings | git_mail |   |
-| app | creds | name |   |
-| app | creds | login |   |
-| app | creds | cred_file |   |
+| systems   | root   | name   |   |
+| systems   | git   | cred\_id   |   |
+| systems   | git   | url   |   |
+| systems   | git   | branch   |   |
+| systems   | git   | work\_branch\_pref   |   |
+| systems   | git   | work\_dir   |   |
+| systems   | git   | auto\_recreate   |   |
+| systems   | git   | auto\_pull   |   |
+| app   | root   | SECRET\_KEY   |   |
+| app   | root   | CSRF   |   |
+| app   | root   | DEBUG   |   |
+| app   | root   | SESSION\_COOKIE\_SECURE   |   |
+| app   | root   | ENV   |   |
+| app   | root   | MAX\_CONTENT\_LENGTH   |   |
+| app   | root   | ALLOWED\_FILE\_EXTENSIONS   |   |
+| app   | root   | uploads\_dir   |   |
+| app   | root   | repository\_dir   |   |
+| app   | loginig   | log\_dir   |   |
+| app   | loginig   | log\_file\_name   |   |
+| app   | loginig   | log\_level   |   |
+| app   | loginig   | log\_max\_size   |   |
+| app   | loginig   | log\_backup\_count   |   |
+| app   | git\_settings   | git\_log\_level   |   |
+| app   | git\_settings   | git\_user   |   |
+| app   | git\_settings   | git\_mail   |   |
+| app   | creds   | name   |   |
+| app   | creds   | login   |   |
+| app   | creds   | cred\_file   |   |

@@ -14,9 +14,179 @@
         <div class="card-body">
             <form action="#" method="POST">
                 <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">CSRF</legend>
+                  <div class="col-sm-10">
+                  {% if  system['CSRF'] %}
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="CSRF" id="CSRFgridRadios1" value="true" checked>
+                          True
+                        </label>
+                      </div>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="CSRF" id="CSRFgridRadios2" value="false">
+                          False
+                      </label>
+                    </div>
+                  {% else %}
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="CSRF" id="CSRFgridRadios1" value="true">
+                          True
+                        </label>
+                      </div>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="CSRF" id="CSRFgridRadios2" value="false" checked>
+                          False
+                      </label>
+                    </div>
+                  {% endif%}
+                  </div>
+                </div>
+                <div class="form-group row">
+                <legend class="col-form-legend col-sm-2">DEBUG</legend>
+                  <div class="col-sm-10">
+                  {% if  system['DEBUG'] %}
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="DEBUG" id="DEBUGgridRadios1" value="true" checked>
+                          True
+                        </label>
+                      </div>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="DEBUG" id="DEBUGgridRadios2" value="false">
+                          False
+                      </label>
+                    </div>
+                  {% else %}
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="DEBUG" id="DEBUGgridRadios1" value="true">
+                          True
+                        </label>
+                      </div>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="DEBUG" id="DEBUGgridRadios2" value="false" checked>
+                          False
+                      </label>
+                    </div>
+                  {% endif%}
+                  </div>
+                </div>
+                <div class="form-group row">
+                <legend class="col-form-legend col-sm-2">SESSION_COOKIE_SECURE</legend>
+                  <div class="col-sm-10">
+                  {% if  system['SESSION_COOKIE_SECURE'] %}
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="SESSION_COOKIE_SECURE" id="SESSION_COOKIE_SECUREgridRadios1" value="true" checked>
+                          True
+                        </label>
+                      </div>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="SESSION_COOKIE_SECURE" id="SESSION_COOKIE_SECUREgridRadios2" value="false">
+                          False
+                      </label>
+                    </div>
+                  {% else %}
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="SESSION_COOKIE_SECURE" id="SESSION_COOKIE_SECUREgridRadios1" value="true">
+                          True
+                        </label>
+                      </div>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="SESSION_COOKIE_SECURE" id="SESSION_COOKIE_SECUREgridRadios2" value="false" checked>
+                          False
+                      </label>
+                    </div>
+                  {% endif%}
+                </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Enviroment</legend>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="ENV" name="ENV" placeholder="Enviroment name" value={{ system['ENV'] }}>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">MAX CONTENT LENGTH</legend>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="MAX_CONTENT_LENGTH" name="MAX_CONTENT_LENGTH" placeholder="Don’t read more than this many bytes from the incoming request data." value={{ system['MAX_CONTENT_LENGTH'] }}>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">ALLOWED FILE EXTENSIONS</label>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="ALLOWED_FILE_EXTENSIONS" name="ALLOWED_FILE_EXTENSIONS" placeholder="Allowed file extensions" value={{ system['ALLOWED_FILE_EXTENSIONS']|join(',') }}>
+                  </div>
+                </div>
+                <div class="form-group row">
                   <legend class="col-form-legend col-sm-2">Repository directory name</legend>
                   <div class="col-sm-10">
-                    <input type="work_dir" class="form-control" id="repository_dir" name="repository_dir" value={{ system['repository_dir'] }}>
+                    <input type="text" class="form-control" id="repository_dir" name="repository_dir" value={{ system['repository_dir'] }}>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Uploads directory name</legend>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="uploads_dir" name="uploads_dir" value={{ system['uploads_dir'] }}>
+                  </div>
+                </div>
+                <p><h3>Loginig</h3></p>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Logs directory name</legend>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="log_dir" name="log_dir" value={{ system['loginig']['log_dir'] }}>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Log file name</legend>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="log_file_name" name="log_file_name" value={{ system['loginig']['log_file_name'] }}>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Logs level</legend>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="log_level" name="log_level" value={{ system['loginig']['log_level'] }}>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Logs file max size</legend>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="log_max_size" name="log_max_size" value={{ system['loginig']['log_max_size'] }}>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Logs rotate count copy</legend>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="log_backup_count" name="log_backup_count" value={{ system['loginig']['log_backup_count'] }}>
+                  </div>
+                </div>
+                <p><h3>Git</h3></p>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Git module logining level</legend>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="git_log_level" name="git_log_level" value={{ system['git_settings']['git_log_level'] }}>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Git user</legend>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="git_user" name="git_user" value={{ system['git_settings']['git_user'] }}>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Git mail</legend>
+                  <div class="col-sm-10">
+                    <input type="email" class="form-control" id="git_mail" name="git_mail" value={{ system['git_settings']['git_mail'] }}>
                   </div>
                 </div>
                 <button type="submit" class="btn btn-primary">Save</button>
