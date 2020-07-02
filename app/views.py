@@ -75,6 +75,20 @@ def read_file(file_path):
         file.close()
     return data
 
+def make_tree(system):
+    system_path = path.join(app.config['REPOSITORY'], app.config['APP_CONFIG']['systems'][system]['git']['work_dir'])
+    tree = dict(name=system_path, children=[])
+    try: lst = listdir(system_path)
+    except OSError:
+        pass #ignore errors
+    else:
+        for name in lst:
+            fn = path.join(system_path, name)
+            if path.isdir(fn):
+                tree['children'].append(make_tree(fn))
+            else:
+                tree['children'].append(dict(name=fn))
+    return tree
 
 @app.before_request
 def start_timer():
@@ -223,6 +237,7 @@ def env_settings_dell_name(system):
 @app.route("/env-settings/<system>/upload", methods=["GET", "POST"])
 def upload(system):
     dirs = list_systems_dirs(system)
+    tree = make_tree(system)
     if request.method == "POST":
         if request.files:
             r = request.form
@@ -248,7 +263,7 @@ def upload(system):
             else:
                 app.logger.info("That file extension is not allowed")
                 return redirect('/env-settings/{}/upload'.format(system))
-    return render_template("public/upload.html", envs=get_systems(), dirs=dirs)
+    return render_template("public/upload.html", envs=get_systems(), dirs=dirs, tree=tree)
 
 @app.route("/env-settings/add", methods=["GET", "POST"])
 def env_settings_add():
