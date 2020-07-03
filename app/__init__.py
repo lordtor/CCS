@@ -6,8 +6,10 @@ from app.lib.flgit import git_operation
 from os import environ, path
 from werkzeug.utils import import_string
 from logging.config import dictConfig
+from flask_ckeditor import CKEditor
 
 app = Flask(__name__)
+ckeditor = CKEditor(app)
 
 
 _env_name = environ.get("APPLICATION_SETTINGS", default="DefaultConfig")

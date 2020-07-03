@@ -1,4 +1,4 @@
-import os.path
+from os import path, makedirs, remove, listdir, walk, unlink
 from git import *
 import git, os, shutil
 from datetime import datetime
@@ -26,16 +26,24 @@ class git_operation():
         self.logger = logging.getLogger("GIT")
         
     def clone(self, branch=None):
-        try:
+        #try:
             if branch == None:
                 branch = self.gc['branch']
             cloned = False
             if os.path.exists( self.gc['DIR_NAME']) and  self.gc['auto_recreate']:
                 if os.path.isdir( self.gc['DIR_NAME']):
                     self.logger.debug(colors.color("{}".format("EXISTING CLEAN"), fg="red"))
-                    shutil.rmtree( self.gc['DIR_NAME'])
+                    #shutil.rmtree( self.gc['DIR_NAME'])
+                    for filename in listdir(self.gc['DIR_NAME']):
+                        file_path = path.join(self.gc['DIR_NAME'], filename)
+                        try:
+                            if path.isfile(file_path) or path.islink(file_path):
+                                unlink(file_path)
+                            elif path.isdir(file_path):
+                                shutil.rmtree(file_path)
+                        except Exception as e:
+                            print('Failed to delete %s. Reason: %s' % (file_path, e))
                     status = "Recreate"
-                os.makedirs( self.gc['DIR_NAME'])
                 repo = Repo.clone_from( self.gc['REMOTE_URL'], self.gc['DIR_NAME'],branch=branch)
                 cloned = True
             elif not os.path.exists( self.gc['DIR_NAME']):
@@ -64,8 +72,8 @@ class git_operation():
                     "cloned": cloned
                 }
             self.logger.info(dumps(log, indent=4))
-        except Exception as e:
-            self.logger.error(str(e))
+        #except Exception as e:
+        #    self.logger.error(str(e))
     def fetch(self):
         try:
             repo = git.Repo.init( self.gc['DIR_NAME'])

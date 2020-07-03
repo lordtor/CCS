@@ -1,4 +1,4 @@
-from os import path, makedirs, remove, listdir, walk
+from os import path, makedirs, remove, listdir, walk, unlink
 from json import load, dump, dumps
 from app.lib.flgit import git_operation as g
 basedir = path.abspath(path.dirname(__file__))
@@ -90,7 +90,15 @@ def check_repository(pathx, conf, log_conf, logger, git):
     for dir in listdir(repository):
         if dir not in systems_dirs:
             print("{} not exist in project setting {}".format(dir, systems_dirs))
-            shutil.rmtree(path.join(repository, dir))
+            for filename in listdir(path.join(repository, dir)):
+                file_path = path.join(path.join(repository, dir), filename)
+                try:
+                    if path.isfile(file_path) or path.islink(file_path):
+                        unlink(file_path)
+                    elif path.isdir(file_path):
+                        shutil.rmtree(file_path)
+                except Exception as e:
+                    print('Failed to delete %s. Reason: %s' % (file_path, e))
             print("Deleted")
 
     return repository
