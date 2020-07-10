@@ -162,7 +162,7 @@ def env_settings_edit(system):
         elif "files" in req:
             return redirect(url_for('env_settings_files', system=system))
         elif "editor" in req:
-            return redirect(url_for('env_settings_files', system=system))
+            return redirect(url_for('env_settings_browse', system=system))
         
     return render_template("public/env-settings-edit.html", system=system_d, envs=get_systems(), creds=get_creds_id())
 
