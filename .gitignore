@@ -35,3 +35,5 @@ env.bak/
 venv.bak/
 .python-version
 supper_password
+app/static/uploads
+app/static/logs

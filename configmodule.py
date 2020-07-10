@@ -1,13 +1,25 @@
 from os import path, makedirs, remove, listdir, walk, unlink
+from sys import platform
 from json import load, dump, dumps
 from app.lib.flgit import git_operation as g
 basedir = path.abspath(path.dirname(__file__))
 import logging, shutil
 from logging.config import dictConfig
 import colors
+from distutils.util import strtobool
+
+def l(logger, t, m):
+    if t == "i":
+        logger.info(colors.color("{}".format(m), fg="blue"))
+    elif t == "d":
+        logger.debug(colors.color("{}".format(m), fg="green"))
+    elif t == "e":
+        logger.error(colors.color('{}'.format(m), fg="red"))
+    elif t == "w":
+        logger.warning(colors.color('{}'.format(m), fg="orange"))
+
 
 def check_path(path_dir):
-    print(path_dir)
     if not path.exists(path_dir):
         makedirs(path_dir)
 
@@ -31,7 +43,7 @@ def load_conf(file_name):
                 "MAX_CONTENT_LENGTH": 50 * 1024 * 1024,
                 "ALLOWED_FILE_EXTENSIONS": ["json", "txt", "html", "conf", "sub"],
                 "repository_dir": "repository",
-                "cred_file_dir": "/run/secrets",
+                "cred_file_dir": "C:\\ccs",
                 "loginig": {
                     "log_dir": "logs",
                     "log_file_name": "CCS.log",
@@ -59,56 +71,81 @@ def load_conf(file_name):
 
 def check_repository(pathx, conf, log_conf, logger, git):
     repository = path.join(pathx, conf['app']['repository_dir'])
-    check_path(repository)
+    #check_path(repository)
     systems_dirs = []
     for system in  conf['systems']:
-        print(conf['systems'][system]["git"]["work_dir"])
         systems_dirs.append(conf['systems'][system]["git"]["work_dir"])
-        logger.info("Check system: {}".format(system))
+        logger.info(colors.color("Check system: {}".format(system), fg="green"))
         DIR_NAME = path.join(repository, conf['systems'][system]['git']['work_dir'])
-        git_config = {}
-        git_config.update( conf['systems'][system]['git'])
-        git_config["DIR_NAME"] = DIR_NAME
-        git_config['log_conf'] = log_conf
-        git_config['cred_id'] = conf['app']['creds'][conf['systems'][system]['git']['cred_id']]
-        git_config['sys_user'] = git
-        go = g(git_config)
-        if not path.exists(DIR_NAME) or ".git" not in listdir(DIR_NAME) or conf['systems'][system]['git']['auto_recreate']:
-            logger.debug(colors.color("{}".format("NOT EXIST"), fg="red"))
-            go.clone(conf['systems'][system]['git']['branch'])
-        else:
-            if conf['systems'][system]['git']['auto_pull']:
-                logger.debug(colors.color("{}".format("AUTO PULL"), fg="green"))
-                go.config_user()
-                go.fetch()
-                go.pull()
+        logger.info(colors.color("{} path: {}".format(system, DIR_NAME), fg="green"))
+        gc = {}
+        gc.update( conf['systems'][system]['git'])
+        gc["DIR_NAME"] = DIR_NAME
+        gc['log_conf'] = log_conf
+        gc['cred_id'] = conf['app']['creds'][conf['systems'][system]['git']['cred_id']]
+        gc['sys_user'] = git
+        go = g(gc)
+        if path.exists(gc['DIR_NAME']) and path.isdir(gc['DIR_NAME']):
+            logger.debug(colors.color("{} {}".format(system, "Path exists"), fg="orange"))
+            if not listdir(gc['DIR_NAME']):
+                logger.debug(colors.color("{} {}".format(system, "Path is empty"), fg="orange"))
+                if strtobool(gc['auto_recreate']):
+                    logger.debug(colors.color("{} auto_recreate: {}".format(system, gc['auto_recreate']), fg="orange"))
+                    try:
+                        logger.debug(colors.color("{} try: {}".format(system, "clean"), fg="orange"))
+                        shutil.rmtree(gc['DIR_NAME'])
+                    except Exception as e:
+                        logger.error(colors.color('{} Failed to delete {}. Reason:{}'.format(system, gc['DIR_NAME'], e), fg="red"))
+                    finally:
+                        logger.debug(colors.color("{} try: {}".format(system, "clone"), fg="orange"))
+                        go.clone(gc['branch'])
             else:
-                logger.debug(colors.color("{}".format("FETCH"), fg="green"))
-                go.config_user()
-                go.fetch()
-
-    for dir in listdir(repository):
-        if dir not in systems_dirs:
-            print("{} not exist in project setting {}".format(dir, systems_dirs))
-            for filename in listdir(path.join(repository, dir)):
-                file_path = path.join(path.join(repository, dir), filename)
-                try:
-                    if path.isfile(file_path) or path.islink(file_path):
-                        unlink(file_path)
-                    elif path.isdir(file_path):
-                        shutil.rmtree(file_path)
-                except Exception as e:
-                    print('Failed to delete %s. Reason: %s' % (file_path, e))
-            print("Deleted")
-
+                logger.debug(colors.color("{} {}".format(system, "Directory is not empty"), fg="orange"))
+                logger.debug(colors.color("{} auto_recreate: {}".format(system, gc['auto_recreate']), fg="orange"))
+                logger.debug(colors.color("{} .git: {}".format(system, path.exists(path.join(gc['DIR_NAME'],".git"))), fg="orange"))
+                logger.debug(colors.color("{} platform: {}".format(system, platform), fg="orange"))
+                if strtobool(gc['auto_recreate']):
+                    if not platform.startswith('win') or not path.exists(path.join(gc['DIR_NAME'],".git")):
+                        for filename in listdir(gc['DIR_NAME']):
+                            file_path = path.join(gc['DIR_NAME'], filename)
+                            try:
+                                logger.debug(colors.color("{} try: {}".format(system, "clean"), fg="orange"))
+                                if path.isfile(file_path) or path.islink(file_path):
+                                    unlink(file_path)
+                                elif path.isdir(file_path):
+                                    shutil.rmtree(file_path)
+                            except Exception as e:
+                                logger.error(colors.color('{} Failed to delete {}. Reason:{}'.format(system, file_path, e), fg="red"))
+                        try:
+                            logger.debug(colors.color("{} try: {}".format(system, "clone"), fg="orange"))
+                            go.clone(gc['branch'])
+                        except Exception as e:
+                            logger.error(colors.color('{} Failed clone {}. Reason:{}'.format(system, file_path, e), fg="red"))
+                    else:
+                        logger.debug(colors.color("{} try: {}".format(system, "head_reset"), fg="orange"))
+                        go.head_reset()
+                        logger.debug(colors.color("{} try: {}".format(system, "pull"), fg="orange"))
+                        go.pull()
+                else:
+                    logger.debug(colors.color("{} try: {}".format(system, "fetch"), fg="orange"))
+                    go.fetch()
+                    logger.debug(colors.color("{} auto_pull: {}".format(system, gc['auto_pull']), fg="orange"))
+                    if strtobool(gc['auto_pull']):
+                        logger.debug(colors.color("{} try: {}".format(system, "pull"), fg="orange"))
+                        go.pull()
+        else:
+            logger.debug(colors.color("{}".format("Given Directory don't exists"), fg="orange"))
+            go.clone()
+        logger.debug(colors.color("Check system: {} is: done".format(system), fg="orange"))
     return repository
 
 
 class Config(object):
-    DEBUG = False
-    TESTING = False
+    APPLICATION_ROOT='/'
     ROOT_DIR = basedir
-    UPLOADS =  path.join(path.join(basedir, 'app/static'), "uploads")
+    APP = path.join(basedir, 'app')
+    STATIC = path.join(APP,'static')
+    UPLOADS =  path.join(STATIC, "uploads")
     check_path(UPLOADS)
     CONFIG_PATH = path.join(UPLOADS, 'ccs')
     check_path(CONFIG_PATH)
@@ -122,6 +159,7 @@ class Config(object):
             "passwd": read_file(APP_CONFIG["app"]["creds"][cred]["cred_file"])
         }
     SESSION_TYPE = 'filesystem'
+    
 
 class DefaultConfig(Config):
     DEBUG = Config.APP_CONFIG["app"]["DEBUG"]
@@ -135,7 +173,7 @@ class DefaultConfig(Config):
         }
     GIT_LOG =  Config.APP_CONFIG["app"]["git_settings"]["git_log_level"]
     LOG_DIR_NAME = Config.APP_CONFIG["app"]["loginig"]["log_dir"]
-    LOG_DIR_PATH = path.join(basedir, path.join('app/static', LOG_DIR_NAME))
+    LOG_DIR_PATH = path.join(basedir, path.join(path.join('app','static'), LOG_DIR_NAME))
     LOG_FILE_NAME = Config.APP_CONFIG["app"]["loginig"]["log_file_name"]
     LOG_LEVEL =  Config.APP_CONFIG["app"]["loginig"]["log_level"]
     LOG_MAX = Config.APP_CONFIG["app"]["loginig"]["log_max_size"]
@@ -186,33 +224,6 @@ class DefaultConfig(Config):
     logging.config.dictConfig(LOG_CONF)
     logger = logging.getLogger("CCS")
     REPOSITORY = check_repository(Config.UPLOADS, Config.APP_CONFIG, LOG_CONF, logger, GIT)
-    
-class ProductionConfig(Config):
-    DEBUG = False
-    ENV = "production"
-    SECRET_KEY = 'OCML3BRawWEUeaxcuKHLpw'
-    DATABASE =  DATABASE = path.join(basedir, 'production_database.db')
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + DATABASE
-    ALLOWED_FILE_EXTENSIONS = ["json", "txt", "html", "conf", "sub"]
-
-class StagingConfig(Config):
-    DEVELOPMENT = True
-    DEBUG = True
-    ENV = "staging"
-    DATABASE =  DATABASE = path.join(basedir, 'staging_database.db')
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + DATABASE
-
-class DevelopmentConfig(Config):
-    DEVELOPMENT = True
-    DEBUG = True
-    ENV = "development"
-    DATABASE = path.join(basedir,'development_database.db')
-    #SQLALCHEMY_MIGRATE_REPO = os.path.join(basedir, 'db_repository')
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + DATABASE
-    SESSION_COOKIE_SECURE = False
-
-class TestingConfig(Config):
-    TESTING = True
-    ENV = "testing"
-    DATABASE = path.join(basedir,'testing_database.db')
-    SQLALCHEMY_DATABASE_URI = 'sqlite:///' + DATABASE
+    FLASKCODE_RESOURCE_BASEPATH = REPOSITORY
+    FLASKCODE_EDITOR_THEME = 'vs'
+    FLASKCODE_APP_TITLE = 'CCS'

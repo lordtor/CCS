@@ -26,43 +26,15 @@ class git_operation():
         self.logger = logging.getLogger("GIT")
         
     def clone(self, branch=None):
-        #try:
+        try:
             if branch == None:
                 branch = self.gc['branch']
             cloned = False
-            if os.path.exists( self.gc['DIR_NAME']) and  self.gc['auto_recreate']:
-                if os.path.isdir( self.gc['DIR_NAME']):
-                    self.logger.debug(colors.color("{}".format("EXISTING CLEAN"), fg="red"))
-                    #shutil.rmtree( self.gc['DIR_NAME'])
-                    for filename in listdir(self.gc['DIR_NAME']):
-                        file_path = path.join(self.gc['DIR_NAME'], filename)
-                        try:
-                            if path.isfile(file_path) or path.islink(file_path):
-                                unlink(file_path)
-                            elif path.isdir(file_path):
-                                shutil.rmtree(file_path)
-                        except Exception as e:
-                            print('Failed to delete %s. Reason: %s' % (file_path, e))
-                    status = "Recreate"
-                repo = Repo.clone_from( self.gc['REMOTE_URL'], self.gc['DIR_NAME'],branch=branch)
-                cloned = True
-            elif not os.path.exists( self.gc['DIR_NAME']):
-                self.logger.debug(colors.color("{}".format("NOT EXISTING"), fg="red"))
-                status = "New"
-                os.makedirs( self.gc['DIR_NAME'])
-                repo = Repo.clone_from( self.gc['REMOTE_URL'], self.gc['DIR_NAME'],branch=branch)
-                cloned = True
-            elif os.path.exists( self.gc['DIR_NAME']) and not self.gc['auto_recreate']:
-                repo = git.Repo.init( self.gc['DIR_NAME'])
-                origin = repo.remotes['origin']
-                self.fetch()
-                if self.gc['auto_pull']:
-                    origin.pull(origin.refs[0].remote_head)
-                    status = "Updated"
-                status = "Not updated"
-                cloned = False
-            else:
-                self.logger.error("Repo not cloned")
+            status = "New"
+            if not path.exists(self.gc['DIR_NAME']):
+                makedirs(self.gc['DIR_NAME'])
+            git.Repo.clone_from( self.gc['REMOTE_URL'], self.gc['DIR_NAME'],branch=branch)
+            cloned = True
             log = {
                     "type": "Clone repository",
                     "recreate":  self.gc['auto_recreate'],
@@ -72,8 +44,9 @@ class git_operation():
                     "cloned": cloned
                 }
             self.logger.info(dumps(log, indent=4))
-        #except Exception as e:
-        #    self.logger.error(str(e))
+        except Exception as e:
+            self.logger.error(colors.color(str(e), fg="red"))
+            self.pull(branch=self.gc['branch'])
     def fetch(self):
         try:
             repo = git.Repo.init( self.gc['DIR_NAME'])
@@ -86,12 +59,12 @@ class git_operation():
             self.logger.info(dumps(log, indent=4))
             return True
         except Exception as e:
-            self.logger.error(str(e))
+            self.logger.error(colors.color(str(e), fg="red"))
     def push(self, commit=None, branch=None):
         try:
             if branch is None:
                 branch = self.gc['branch']
-            repo = Repo( self.gc['DIR_NAME'])
+            repo = git.Repo( self.gc['DIR_NAME'])
             origin = repo.remote('origin')
             origin.push(branch)
             #repo.git.add(update=True)
@@ -103,12 +76,12 @@ class git_operation():
             self.logger.info(dumps(log, indent=4))
             return True
         except Exception as e:
-            self.logger.error(str(e))
+            self.logger.error(colors.color(str(e), fg="red"))
     def pull(self, branch=None):
         try:
             if branch == None:
                 branch = self.gc['branch']
-            repo = Repo( self.gc['DIR_NAME'])
+            repo = git.Repo( self.gc['DIR_NAME'])
             repo.remotes.origin.pull(branch)
             log = {
                 "type": "Pull repository",
@@ -118,10 +91,10 @@ class git_operation():
             self.logger.info(dumps(log, indent=4))
             return True
         except Exception as e:
-            self.logger.error(str(e))
+            self.logger.error(colors.color(str(e), fg="red"))
     def add(self, files):
         try:
-            repo = Repo( self.gc['DIR_NAME'])
+            repo = git.Repo( self.gc['DIR_NAME'])
             repo.index.add(files)
             log = {
                 "type": "Add files",
@@ -131,12 +104,12 @@ class git_operation():
             self.logger.info(dumps(log, indent=4))
             return True
         except Exception as e:
-            self.logger.error(str(e))
+            self.logger.error(colors.color(str(e), fg="red"))
     def commit(self, message=None):
         try:
             if message == None:
                 message = "Auto commit at {}".format(str(datetime.now()).split('.')[0].replace(' ','_').replace(':','_'))
-            repo = Repo( self.gc['DIR_NAME'])
+            repo = git.Repo( self.gc['DIR_NAME'])
             repo.index.commit(message)
             log = {
                 "type": "Commit",
@@ -146,23 +119,24 @@ class git_operation():
             self.logger.info(dumps(log, indent=4))
             return True
         except Exception as e:
-            self.logger.error(str(e))
+            self.logger.error(colors.color(str(e), fg="red"))
+
     def list_remotes(self):
         try:
-            repo = Repo( self.gc['DIR_NAME'])
+            repo = git.Repo( self.gc['DIR_NAME'])
             remotes = []
             for remote in repo.remotes:
                 print(f'- {remote.name} {remote.url}')
                 remotes.append(f'- {remote.name} {remote.url}')
             return remotes
         except Exception as e:
-            self.logger.error(str(e))
+            self.logger.error(colors.color(str(e), fg="red"))
+
     def check_changes(self):
         try:
             #self.logger.info('Check changes for folder:{}'.format( self.gc['DIR_NAME']))
-            repo = Repo( self.gc['DIR_NAME'])
+            repo = git.Repo( self.gc['DIR_NAME'])
             self.fetch()
-
             changed = [ item.a_path for item in repo.index.diff(None) ]
             if self.gc['DIR_NAME'] in repo.untracked_files:
                 return 'Untracked'
@@ -180,17 +154,17 @@ class git_operation():
             #     self.logger.info('Changes not detected.')
             #     return False
         except Exception as e:
-            self.logger.error(str(e))
+            self.logger.error(colors.color(str(e), fg="red"))
     def head_reset(self):
         try:
-            repo = Repo( self.gc['DIR_NAME'])
+            repo = git.Repo( self.gc['DIR_NAME'])
             repo.head.reset(index=True, working_tree=True)
             return True
         except Exception as e:
-            self.logger.error(str(e))
+            self.logger.error(colors.color(str(e), fg="red"))
     def list_diff_changes(self):
         try:
-            repo = Repo( self.gc['DIR_NAME'])
+            repo = git.Repo( self.gc['DIR_NAME'])
             diff = repo.git.diff(repo.head.commit.tree)
             changedFiles = [ item.a_path for item in repo.index.diff(None) ]
             self.logger.debug(colors.color("{}".format(changedFiles), fg="red"))
@@ -207,19 +181,19 @@ class git_operation():
             self.logger.info(repo.untracked_files)
             return {"diff": diff,  "changed_files": changedFiles, "untracked_files": un}
         except Exception as e:
-                self.logger.error(str(e))
+                self.logger.error(colors.color(str(e), fg="red"))
     def config_user(self):
         try:
-            repo = Repo( self.gc['DIR_NAME'])
+            repo = git.Repo( self.gc['DIR_NAME'])
             with repo.config_writer() as git_config:
                 git_config.set_value('user', 'email', self.gc['sys_user']['mail'])
                 git_config.set_value('user', 'name', self.gc['sys_user']['user'])
                 self.logger.info("Set git user: {} and git mail: {}".format(self.gc['sys_user']['user'], self.gc['sys_user']['mail']))
         except Exception as e:
-            self.logger.error(str(e))
+            self.logger.error(colors.color(str(e), fg="red"))
     def list_branch(self):
         try:
-            repo = Repo( self.gc['DIR_NAME'])
+            repo = git.Repo( self.gc['DIR_NAME'])
             self.logger.info('Branch list:')
             branches = []
             for branch in repo.branches:
@@ -227,10 +201,10 @@ class git_operation():
                 self.logger.info(branch)
             return branches
         except Exception as e:
-            self.logger.error(str(e))
+            self.logger.error(colors.color(str(e), fg="red"))
     def branch_new (self, name=None, pref=None):
         try:
-            repo = Repo( self.gc['DIR_NAME'])
+            repo = git.Repo( self.gc['DIR_NAME'])
             if name is None:
                 if pref is None:
                     name = 'branch-'+str(datetime.now()).split('.')[0].replace(' ','_').replace(':','_')
@@ -243,11 +217,11 @@ class git_operation():
             self.logger.info('New branch name is: {}'.format(name))
             return name
         except Exception as e:
-            self.logger.error(str(e))
+            self.logger.error(colors.color(str(e), fg="red"))
     def checkout (self, branch):
         try:
             repo = git.Repo.init( self.gc['DIR_NAME'])
             repo.git.checkout(branch)
             self.logger.info('Current branch name is: {}'.format(branch))
         except Exception as e:
-            self.logger.error(str(e))
+            self.logger.error(colors.color(str(e), fg="red"))
