@@ -10,136 +10,8 @@
  
   <div class="row">
     <div class="col">
-        {% if system %}
-        <h1>System: {{  system['name']|upper  }}</h1>
+      <h1>Systems</h1>
       <hr>
-
-      <div class="card">
-        <div class="card-body">
-            {% set system_url = '/env-settings/' + system['name'] %}
-            <form action="#" method="POST">
-                <div class="form-group row">
-                  <legend class="col-form-legend col-sm-2">Name</legend>
-                  <div class="col-sm-10">
-                    <input type="text" class="form-control" id="name" name="name" placeholder="System name" value={{ system['name'] }}>
-                  </div>
-                </div>
-
-                <div class="form-group row">
-                  <legend class="col-form-legend col-sm-2">Git url</legend>
-                  <div class="col-sm-10">
-                    <input type="url" class="form-control" id="url" name="url" placeholder="Git url" value={{ system['git']['url'] }}>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <legend class="col-form-legend col-sm-2">Cred ID</legend>
-                  <div class="col-sm-10">
-                    <select  id="cred" name="cred" class="form-control">
-                    {% for cred in creds %}
-                      {% if  system['git']['cred_id'] == cred %}
-                        <option selected>{{ cred }}</option>
-                      {% else %}
-                        <option>{{ cred }}</option>
-                      {% endif%}
-                      
-                    {% endfor %}
-                    </select>
-                    </div>
-                </div>
-                <div class="form-group row">
-                  <legend class="col-form-legend col-sm-2">Branch</legend>
-                  <div class="col-sm-10">
-                    <input type="branch" class="form-control" id="branch" name="branch" placeholder="Base branch" value={{ system['git']['branch'] }}>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <legend class="col-form-legend col-sm-2">Branch prefix</legend>
-                  <div class="col-sm-10">
-                    <input type="work_branch_pref" class="form-control" id="work_branch_pref" name="work_branch_pref" placeholder="Branch prefix for upload to oridgin" value={{ system['git']['work_branch_pref'] }}>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <legend class="col-form-legend col-sm-2">Folder name</legend>
-                  <div class="col-sm-10">
-                    <input type="work_dir" class="form-control" id="work_dir" name="work_dir" placeholder="Folder name in PV" value={{ system['git']['work_dir'] }}>
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <legend class="col-form-legend col-sm-2">Auto recreate</legend>
-                  <div class="col-sm-10">
-                  {% if  system['git']['auto_recreate'] %}
-                    <div class="form-check">
-                      <label class="form-check-label">
-                        <input class="form-check-input" type="radio" name="auto_recreate" id="gridRadios1" value="true" checked>
-                          True
-                        </label>
-                      </div>
-                    <div class="form-check">
-                      <label class="form-check-label">
-                        <input class="form-check-input" type="radio" name="auto_recreate" id="gridRadios2" value="false">
-                          False
-                      </label>
-                    </div>
-                  {% else %}
-                    <div class="form-check">
-                      <label class="form-check-label">
-                        <input class="form-check-input" type="radio" name="auto_recreate" id="gridRadios1" value="true">
-                          True
-                        </label>
-                      </div>
-                    <div class="form-check">
-                      <label class="form-check-label">
-                        <input class="form-check-input" type="radio" name="auto_recreate" id="gridRadios2" value="false" checked>
-                          False
-                      </label>
-                    </div>
-                  {% endif%}
-                  </div>
-                </div>
-                <div class="form-group row">
-                  <legend class="col-form-legend col-sm-2">Auto pull</legend>
-                  <div class="col-sm-10">
-                  {% if  system['git']['auto_pull'] %}
-                    <div class="form-check">
-                      <label class="form-check-label">
-                        <input class="form-check-input" type="radio" name="auto_pull" id="gridRadios1" value="true" checked>
-                          True
-                        </label>
-                      </div>
-                    <div class="form-check">
-                      <label class="form-check-label">
-                        <input class="form-check-input" type="radio" name="auto_pull" id="gridRadios2" value="false">
-                          False
-                      </label>
-                    </div>
-                  {% else %}
-                    <div class="form-check">
-                      <label class="form-check-label">
-                        <input class="form-check-input" type="radio" name="auto_pull" id="gridRadios1" value="true">
-                          True
-                        </label>
-                      </div>
-                    <div class="form-check">
-                      <label class="form-check-label">
-                        <input class="form-check-input" type="radio" name="auto_pull" id="gridRadios2" value="false" checked>
-                          False
-                      </label>
-                    </div>
-                  {% endif%}
-                  </div>
-                </div>
-                <a class="btn btn-outline-info" href="/env-settings">Back</a>
-                <button type="submit" class="btn btn-primary" name="save">Save</button>
-                <a class="btn btn-outline-success" href={{ system_url }}>Revert</a>
-                <a class="btn btn-danger" href={{ system_url }}/dell>Delete</a>
-                <a class="btn btn-info" href={{ system_url }}/diff>Diff</a>
-                <button type="submit" class="btn btn-primary" name="push">Push</button>
-                <a class="btn btn-outline-success" href={{ system_url }}/upload>Upload files</a>
-            </form>
-        {% else %}
-        <h1>Systems</h1>
-      <hr>
-      
       <div class="card">
         <div class="card-body">
           <table class="table">
@@ -164,14 +36,13 @@
                 <th>
                     <a class="btn btn-info" href={{ system_url }}/diff>Diff</a>
                     <a class="btn btn-success" href={{ system_url }}/update>Update</a>
-                    <a class="btn btn-warning" href={{ system_url }}>Edit</a>
+                    <a class="btn btn-warning" href={{ system_url }}/edit>Edit</a>
                 </th>
               </tr>
               {% endfor %}
             </tbody>
           </table>
            <a class="btn btn-primary" href="/env-settings/add">Add</a>
-        {% endif %}
         </div>
       </div>
     </div>

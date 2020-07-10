@@ -1,0 +1,26 @@
+<ul id="tree1">
+        {%- for item in dir_tree.children recursive %}
+        {% if item.is_file %} 
+        <li title="{{ item.name }}" 
+            data-path-name="{{ item.path_name }}"
+            data-url="{{ url_for("static", filename=item.path_name) }}"
+            id="{{ item.path_name }}">
+            <button class="btn btn-link btn-sm" value="{{ url_for("static", filename=item.path_name) }}" onclick=loadFileC(this)>{{ item.name }}</button>
+            
+            {% elif not item.children %} 
+        <li title="{{ item.name }}"
+            data-path-name="{{ item.path_name }}"
+            data-url="{{ url_for("static", filename=item.path_name) }}"
+            id="{{ item.path_name }}" >
+                disabled
+            {% else %} 
+        <li title="{{ item.name }}" data-path-name="{{ item.path_name }}" 
+            data-url="{{ url_for("static", filename=item.path_name) }}" id="{{ item.path_name }}" data-expanded="false">
+            {{ item.name }}
+            {% endif %}
+            {%- if item.children -%}
+            <ul>{{ loop(item.children) }}</ul>
+            {%- endif %}
+        </li>
+        {%- endfor %}
+    </ul>

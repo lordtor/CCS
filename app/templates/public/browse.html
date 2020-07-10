@@ -1,0 +1,245 @@
+{% extends "public/templates/public_template.html" %}
+{% from 'public/_macros.html' import render_dir_tree %}
+
+{% block title %}Browse system: {{system}}{% endblock %}
+{% block head %}
+
+{% endblock head %}
+{% block main %}
+
+
+<div class="container-fluid">
+  <div class="row">
+    <div class="col">
+      <h1>Browse system files for: {{system}}</h1>
+      <hr>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col col-2">
+          <div class="card">
+            <div class="card-body">
+              <div class="list-container">
+                {{ render_dir_tree(dtree, 'dir-tree') }}
+              </div>
+            </div>
+          </div>
+    </div>
+    <div class="col col-10">
+          <form  action="#" method="GET" id="BrowseForm">
+                <div class="card">
+                  <div class="card-body">
+                    <div class="form-row align-items-center">
+                        <div class="col-sm-7">
+                          <label class="sr-only" for="Path">Path</label>
+                          <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                              <div class="input-group-text">Path</div>
+                            </div>
+                            <input type="text" class="form-control" name="Path" id="Path" value='' placeholder="Path">
+                          </div>
+                        </div>
+                        <div class="col-auto">
+                          <button type="submit" class="btn btn-primary">Reload</button>
+                        </div>
+                        <div class="col-auto">
+                          <a class="btn btn-primary" onclick="saveData()"><font color="white">Save</font></a>
+                        </div>
+                        <div class="col-auto">
+                          <label class="sr-only" for="themeselect">Theme</label>
+                          <div class="input-group mb-2">
+                            <div class="input-group-prepend">
+                              <div class="input-group-text">Theme</div>
+                            </div>
+                            <select class="class="form-control"" id = "themeselect" onchange="changeTheme(this)">
+                              <option>vs</option>
+                              <option>vs-dark</option>
+                              <option>hc-black</option>
+                            </select>
+                          </div>
+                        </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-body">
+                    <div class="form-group">
+                          <div id="editor" style="min-height: 600px" ></div>
+                    </div>
+                  </div>
+                </div>
+          </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+{% block script %}
+
+<script>
+/// <reference path="../vendor/monaco-editor/monaco.d.ts" />
+'use strict';
+require.config({
+    baseUrl: "{{ url_for('static', filename='vendor/monaco-editor/min/') }}"
+});
+var editor = null;
+$(document).ready(function() {
+    require(['vs/editor/editor.main'], function() {
+      loadFile('{{ file_url }}');
+    });
+    
+    window.onresize = function() {
+            editor.layout();
+    };
+});
+
+
+function loadFile(furl) {
+    $.ajax({
+        type: 'GET',
+        cache: false,
+        url: furl,
+        dataType: 'text',
+        beforeSend: function() {
+            $('.loading.editor').show();
+        },
+        error: function() {
+            if (editor) {
+                if (editor.getModel()) {
+                    editor.getModel().dispose();
+                }
+                editor.dispose();
+                editor = null;
+            }
+            $('.loading.editor').fadeOut({
+                duration: 200
+            });
+            $('#editor').empty();
+            $('#editor').append('');
+        }
+    }).done(function(data) {
+        if (!data){
+          var data = '';
+        }
+        if (!editor) {
+            $('#editor').empty();
+            editor = monaco.editor.create(document.getElementById('editor'), {
+                model: null,
+            });
+        }
+        
+        var oldModel = editor.getModel();
+        var newModel = monaco.editor.createModel(data,  undefined, monaco.Uri.file(furl));
+        editor.setModel(newModel);
+        if ( furl.includes('clean.txt') ){
+          document.getElementById("Path").setAttribute("value", '');
+        } else {
+          document.getElementById('Path').value = furl;
+        }
+        
+        if (oldModel) {
+            oldModel.dispose();
+        }
+        editor.setTheme = 'vs-dark';
+        
+        $('.loading.editor').fadeOut({
+            duration: 300
+        });
+    });
+}
+
+function saveData() {
+        var form = $('#BrowseForm')[0];
+        var data = new FormData(form);
+        data.append("monaco", editor.getModel().getValue());
+        data.append("system", '{{system}}');
+        $.ajax({
+            url: '/env-settings/{{system}}/browse/save',
+            data: data,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            cache: false,
+            success: function (res) { 
+              $('#tree1').replaceWith(res.tree);
+              init();
+              },
+            error: function (error) { console.log(error) }
+        });
+}
+
+function loadFileC(data) {
+        loadFile(data.value)
+        
+}
+
+var select = document.getElementById("themeselect");
+var currentTheme = "vs";
+select.onchange = function () {
+		currentTheme = select.options[select.selectedIndex].value;
+		monaco.editor.setTheme(currentTheme);
+};
+
+</script>
+<script type="text/javascript">
+function init() {
+  $.fn.extend({
+      treed: function (o) {
+        var openedClass = 'oi oi-folder';
+        var closedClass = 'oi oi-file';
+        if (typeof o != 'undefined'){
+          if (typeof o.openedClass != 'undefined'){
+          openedClass = o.openedClass;
+          }
+          if (typeof o.closedClass != 'undefined'){
+          closedClass = o.closedClass;
+          }
+        };
+          //initialize each of the top levels
+          var tree = $(this);
+          tree.addClass("tree");
+          tree.find('li').has("ul").each(function () {
+              var branch = $(this); //li with children ul
+              branch.prepend("");
+              branch.addClass('branch');
+              branch.on('click', function (e) {
+                  if (this == e.target) {
+                      var icon = $(this).children('i:first');
+                      icon.toggleClass(openedClass + " " + closedClass);
+                      $(this).children().children().toggle();
+                  }
+              })
+              branch.children().children().toggle();
+          });
+          //fire event from the dynamically added icon
+        tree.find('.branch .indicator').each(function(){
+          $(this).on('click', function () {
+              $(this).closest('li').click();
+          });
+        });
+          //fire event to open branch if the li contains an anchor instead of text
+          tree.find('.branch>a').each(function () {
+              $(this).on('click', function (e) {
+                  $(this).closest('li').click();
+                  e.preventDefault();
+              });
+          });
+          //fire event to open branch if the li contains a button instead of text
+          tree.find('.branch>button').each(function () {
+              $(this).on('click', function (e) {
+                  $(this).closest('li').click();
+                  e.preventDefault();
+              });
+          });
+      }
+  });
+  //Initialization of treeviews
+  $('#tree1').treed();
+  $('#tree2').treed({openedClass:'fa-folder-open', closedClass:'fa-folder'});
+}
+init();
+document.addEventListener('swup:contentReplaced', init);
+</script>
+
+{% endblock %}
+

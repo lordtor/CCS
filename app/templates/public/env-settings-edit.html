@@ -1,0 +1,208 @@
+{% extends "public/templates/public_template.html" %}
+ 
+{% block title %}Systems{% endblock %}
+ 
+
+
+{% block main %}
+<div class="container">
+
+ 
+  <div class="row">
+    <div class="col">
+        <h1>System: {{  system['name']|upper  }}</h1>
+      <hr>
+      <div class="card">
+        <div class="card-body">
+            {% set system_url = '/env-settings/' + system['name'] %}
+            <form action="#" method="POST">
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Name</legend>
+                  <div class="col-sm-10">
+                    <input type="text" class="form-control" id="name" name="name" placeholder="System name" value={{ system['name'] }}>
+                  </div>
+                </div>
+
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Git url</legend>
+                  <div class="col-sm-10">
+                    <input type="url" class="form-control" id="url" name="url" placeholder="Git url" value={{ system['git']['url'] }}>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Cred ID</legend>
+                  <div class="col-sm-10">
+                    <select  id="cred" name="cred" class="form-control">
+                    {% for cred in creds %}
+                      {% if  system['git']['cred_id'] == cred %}
+                        <option selected>{{ cred }}</option>
+                      {% else %}
+                        <option>{{ cred }}</option>
+                      {% endif%}
+                      
+                    {% endfor %}
+                    </select>
+                    </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Branch</legend>
+                  <div class="col-sm-10">
+                    <input type="branch" class="form-control" id="branch" name="branch" placeholder="Base branch" value={{ system['git']['branch'] }}>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Branch prefix</legend>
+                  <div class="col-sm-10">
+                    <input type="work_branch_pref" class="form-control" id="work_branch_pref" name="work_branch_pref" placeholder="Branch prefix for upload to oridgin" value={{ system['git']['work_branch_pref'] }}>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Folder name</legend>
+                  <div class="col-sm-10">
+                    <input type="work_dir" class="form-control" id="work_dir" name="work_dir" placeholder="Folder name in PV" value={{ system['git']['work_dir'] }}>
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Auto recreate</legend>
+                  <div class="col-sm-10">
+                  {% if  system['git']['auto_recreate'] %}
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="auto_recreate" id="gridRadios1" value="true" checked>
+                          True
+                        </label>
+                      </div>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="auto_recreate" id="gridRadios2" value="false">
+                          False
+                      </label>
+                    </div>
+                  {% else %}
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="auto_recreate" id="gridRadios1" value="true">
+                          True
+                        </label>
+                      </div>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="auto_recreate" id="gridRadios2" value="false" checked>
+                          False
+                      </label>
+                    </div>
+                  {% endif%}
+                  </div>
+                </div>
+                <div class="form-group row">
+                  <legend class="col-form-legend col-sm-2">Auto pull</legend>
+                  <div class="col-sm-10">
+                  {% if  system['git']['auto_pull'] %}
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="auto_pull" id="gridRadios1" value="true" checked>
+                          True
+                        </label>
+                      </div>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="auto_pull" id="gridRadios2" value="false">
+                          False
+                      </label>
+                    </div>
+                  {% else %}
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="auto_pull" id="gridRadios1" value="true">
+                          True
+                        </label>
+                      </div>
+                    <div class="form-check">
+                      <label class="form-check-label">
+                        <input class="form-check-input" type="radio" name="auto_pull" id="gridRadios2" value="false" checked>
+                          False
+                      </label>
+                    </div>
+                  {% endif%}
+                  </div>
+                </div>
+                <div class="modal fade" id="deleteSystemModal" tabindex="-1" role="dialog" aria-labelledby="deleteSystemModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="deleteSystemModalLabel">Delete system: {{ system['name'] }}</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        Are you sure you want to delete the configuration for: {{ system['name'] }}
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-success" data-dismiss="modal">No</button>
+                        <button type="submit" class="btn btn-danger" name="push">Delete</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal fade" id="pushSystemModal" tabindex="-1" role="dialog" aria-labelledby="pushSystemModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="pushSystemModalLabel">Push changes system: {{ system['name'] }} to remote</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        Are you sure you want to push changes for: {{ system['name'] }}
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-success" data-dismiss="modal">No</button>
+                        <button type="submit" class="btn btn-danger" name="push">Push</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal fade" id="saveSystemModal" tabindex="-1" role="dialog" aria-labelledby="saveSystemModalLabel" aria-hidden="true">
+                  <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                      <div class="modal-header">
+                        <h5 class="modal-title" id="saveSystemModalLabel">Save configuration changes for system: {{ system['name'] }} to remote</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                        </button>
+                      </div>
+                      <div class="modal-body">
+                        Are you sure you want save changes for: {{ system['name'] }}
+                      </div>
+                      <div class="modal-footer">
+                        <button type="button" class="btn btn-success" data-dismiss="modal">No</button>
+                        <button type="submit" class="btn btn-danger" name="save">Save</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <button type="submit" class="btn btn-primary" name="back">Back</button>
+                <button type="submit" class="btn btn-primary" name="revert">Revert</button>
+                <button type="submit" class="btn btn-primary" name="diff">Diff</button>
+                <button type="submit" class="btn btn-primary" name="editor">Editor</button>
+                <button type="submit" class="btn btn-primary" name="files">Files</button>
+                <a type="button"      class="btn btn-primary" data-toggle="modal" data-target="#saveSystemModal">Save</a>
+                <a type="button"      class="btn btn-primary" data-toggle="modal" data-target="#pushSystemModal">Push</a>
+                <a type="button"      class="btn btn-primary" data-toggle="modal" data-target="#deleteSystemModal">Delete</a>
+            </form>
+            <!-- Modal -->
+
+
+
+        </div>
+      </div>
+    </div>
+  </div>
+  
+
+</div>
+
+  
+{% endblock %}

@@ -6,12 +6,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <!-- Import the Bootstrap stylesheet -->
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/bootstrap.min.css') }}">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/open-iconic-bootstrap.min.css') }}">
-
-  
+{% assets "css_all" %}
+    <link rel="stylesheet" href="{{ ASSET_URL }}">
+{% endassets %}
   <title>{% block title %}{% endblock title %}</title>
+  {% block head %}{% endblock head %}
 </head>
 
 <body>
@@ -35,7 +34,7 @@
           <div class="dropdown-divider"></div>
             {% for env in envs %}
               {% set env_url = '/env-settings/' + env%}
-              <a class="dropdown-item" href={{ env_url }}>{{ env }}</a>
+              <a class="dropdown-item" href={{ env_url }}/edit>{{ env }}</a>
             {% endfor %}
           
         </div>
@@ -52,7 +51,7 @@
   <div class="collapse navbar-collapse" id="navbarNav">
     <ul class="navbar-nav ml-auto">
       <li class="nav-item">
-        <a class="nav-link" href="/admin/dashboard">Admin</a>
+        <a class="nav-link" href="#"></a>
       </li>
     </ul>
   </div>
@@ -62,7 +61,10 @@
   <main>
     
     {% block main %}{% endblock main %}
+    {% block menu %}{% endblock %}
+    {% block content %}{% endblock %}
   </main>
+  
   <footer class="message">
       <div class="container">
         {% with messages = get_flashed_messages(with_categories=true) %}
@@ -79,11 +81,9 @@
   {% endwith %}
       </div>
   </footer>
-  <!-- Import jquery 3.3.1 slim min -->
-  <script src="{{ url_for('static', filename='js/jquery.min.js') }}"></script>
-  <!-- Import Bootstrap bundle -->
-  <script src="{{ url_for('static', filename='js/bootstrap.min.js') }}"></script>
-  <script src="{{ url_for('static', filename='js/popper.min.js') }}"></script>
+{% assets "js_all" %}
+    <script type="text/javascript" src="{{ ASSET_URL }}"></script>
+{% endassets %}
   {% block script %}{% endblock %}
 </body>
 
