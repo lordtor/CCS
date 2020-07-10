@@ -18,109 +18,66 @@ html {
   /* background-color: #f5f5f5; */
 }
 .tree, .tree ul {
-    margin:0;
-    padding:0;
-    list-style:none
+  margin:0;
+  padding:0;
+  list-style:none;
+  margin-left:10px;
 }
 .tree ul {
-    margin-left:1em;
-    position:relative
+  margin-left:1em;
+  position:relative
 }
 .tree ul ul {
-    margin-left:.5em
+  margin-left:.5em
 }
-
 .tree ul:before {
-    content:"";
-    display:block;
-    width:0;
-    position:absolute;
-    top:18px;
-    bottom:16px;
-    left:40px;
-    border-left:1px solid;
-    border-color: #556f7b;
+  content:"";
+  display:block;
+  width:0;
+  position:absolute;
+  top:0;
+  bottom:0;
+  left:0;
+  border-left:1px solid
 }
 .tree li {
-    margin:0;
-    padding:0 1em;
-    line-height:2em;
-  
-    position:relative;
-    font-family: Roboto;
-  font-size: 14px;
-  font-weight: 500;
-  font-style: normal;
-  font-stretch: normal;
-  letter-spacing: normal;
-  text-align: left;
-  color: #000000;
+  margin:0;
+  padding:0 1em;
+  line-height:2em;
+  color:#369;
+  font-weight:700;
+  position:relative
 }
 .tree ul li:before {
-    content:"";
-    display:block;
-    width:10px;
-    height:0;
-    border-top:1px solid;
-    margin-top:-1px;
-    position:absolute;
-    top:32px;
-    left:40px;
-  border-color: #556f7b;
+  content:"";
+  display:block;
+  width:10px;
+  height:0;
+  border-top:1px solid;
+  margin-top:-1px;
+  position:absolute;
+  top:1em;
+  left:0
 }
 .tree ul li:last-child:before {
-    background:#fff;
-    height:auto;
-    top:32px;
-    bottom:0
+  background:#fff;
+  height:auto;
+  top:1em;
+  bottom:0
 }
-
 .indicator {
-    margin-right:5px;
+  margin-right:5px;
 }
 .tree li a {
-    text-decoration: none;
-   font-family: Roboto;
-  font-size: 14px;
-  font-weight: 500;
-  font-style: normal;
-  font-stretch: normal;
-  letter-spacing: normal;
-  text-align: left;
-  color: #000000;
+  text-decoration: none;
+  color:#369;
 }
 .tree li button, .tree li button:active, .tree li button:focus {
-    text-decoration: none;
-    color:#369;
-    border:none;
-    background:transparent;
-    margin:0px 0px 0px 0px;
-    padding:0px 0px 0px 0px;
-    outline: 0;
-  
+  text-decoration: none;
+  color:#369;
+  border:none;
+  background:transparent;
+  margin:0px 0px 0px 0px;
+  padding:0px 0px 0px 0px;
+  outline: 0;
 }
-
-.branch{
-      
-  height: 64px;
-  border-radius: 2px;
-  box-shadow: 0 0 2px 0 rgba(0, 0, 0, 0.12), 0px 2px 2px 0 rgba(0, 0, 0, 0.15);
-  border: solid 1px transparent;
-      padding-top: 18px!important;
-      cursor: pointer;
-}
-.indicator{
-    color: transparent;
-    margin-left: 5px;
-    margin-right: 5px;
-}
-.first-level .branch{
-    padding-left: 40px;
-    margin-bottom: 6px;
-}
- .orange-light{
-    background: #fff4e7;
- }
- .display-block{
-    display:block!important;
- }
